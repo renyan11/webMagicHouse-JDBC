@@ -43,8 +43,8 @@ public class LianJiaHousePageProcessor implements PageProcessor {
 				.all());
 			
 			// 添加其他列表页 //*[@id="matchid"]/div/div/div
-			page.addTargetRequests(page.getHtml().xpath("//div[@class='page-box house-lst-page-box']").links()
-				.regex("/loupan/pg\\d+/")
+			page.addTargetRequests(page.getHtml().xpath("//div[@id='matchid']/div/div/div").links()
+				.regex("/loupan/pg\\d+")
 				.replace("/loupan/", "http://"+cityname+"\\.fang\\.lianjia\\.com/loupan/")// 巧用替换给把相对url转换成绝对url
 				.all());
 		}else{
@@ -62,7 +62,8 @@ public class LianJiaHousePageProcessor implements PageProcessor {
 			// 设置房源名称
 			ljhb.setHouseName(page.getHtml().xpath("//div[@class='name-box']/a/h1/text()").get());
 			// 设置房源均价
-			ljhb.setPrice(page.getHtml().xpath("//p[@class='jiage']/span[@class='junjia']/text()").get()+page.getHtml().xpath("//p[@class='jiage']/span[@class='yuan']/text()").get());
+			String price = page.getHtml().xpath("//p[@class='jiage']/span[@class='junjia']/text()").get()+page.getHtml().xpath("//p[@class='jiage']/span[@class='yuan']/text()").get();
+			ljhb.setPrice((price == "nullnull" || "nullnull".equals(price))?" 价格待定":price);
 			// 设置更新日期
 			ljhb.setUpdateDate(page.getHtml().xpath("//p[@class='update']/span/text()").get());
 			// 设置房源标签(多个)
@@ -105,7 +106,7 @@ public class LianJiaHousePageProcessor implements PageProcessor {
 		System.out.println("【爬虫开始】请耐心等待一大波数据到你碗里来...");
 		startTime = System.currentTimeMillis();
 		// 从城市房源首页开始抓，开启5个线程，启动爬虫
-		Spider.create(new LianJiaHousePageProcessor()).addUrl("http://" +cityname+ ".fang.lianjia.com/loupan").thread(5).run();
+		Spider.create(new LianJiaHousePageProcessor()).addUrl("http://" +cityname+ ".fang.lianjia.com/loupan/pg1").thread(5).run();
 		endTime = System.currentTimeMillis();
 		System.out.println("【爬虫结束】共抓取" + size + "个房源，耗时约" + ((endTime - startTime) / 1000) + "秒，已保存到数据库，请查收！");
 	}
