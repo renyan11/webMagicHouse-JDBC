@@ -114,7 +114,8 @@ public class LianJiaHousePageProcessor implements PageProcessor {
 		Spider create = Spider.create(new LianJiaHousePageProcessor());
 		//page1必须先执行,不然拿不到pageNum
 		create.addUrl("http://" +cityname+ ".fang.lianjia.com/loupan/pg1").thread(15).run();
-		for (int i = 2; i <= (Integer.parseInt(pageNum)/10); i++) {
+		int pageCount = (Integer.parseInt(pageNum)%10==0)?(Integer.parseInt(pageNum)/10):(Integer.parseInt(pageNum)/10)+1;
+		for (int i = 2; i <= pageCount; i++) {
 			// 从城市房源page2开始抓，开启15个线程，启动爬虫
 			create.addUrl("http://" +cityname+ ".fang.lianjia.com/loupan/pg"+i).thread(15).run();
 		}
