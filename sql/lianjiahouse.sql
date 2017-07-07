@@ -24,10 +24,10 @@ CREATE TABLE `lianjiahouse` (
   `houseState` varchar(100) DEFAULT NULL COMMENT '房源状态',
   `houseName` varchar(200) DEFAULT NULL COMMENT '房源名称',
   `price` varchar(65) DEFAULT NULL COMMENT '均价',
-  `updateDate` varchar(0) DEFAULT NULL COMMENT '更新日期',
+  `updateDate` varchar(200) DEFAULT NULL COMMENT '更新日期',
   `wuyeType` varchar(200) DEFAULT NULL COMMENT '物业类型',
   `address` varchar(500) DEFAULT NULL COMMENT '项目地址',
-  `openOrderDate` varchar(0) DEFAULT NULL COMMENT '最新开盘日期',
+  `openOrderDate` varchar(200) DEFAULT NULL COMMENT '最新开盘日期',
   `contextPhone` varchar(100) DEFAULT NULL COMMENT '咨询电话',
   `tags` varchar(200) DEFAULT NULL COMMENT '房源标签',
   PRIMARY KEY (`id`)

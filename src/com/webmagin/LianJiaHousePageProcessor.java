@@ -25,7 +25,9 @@ public class LianJiaHousePageProcessor implements PageProcessor {
 	
 	// 抓取网站的相关配置，包括：编码、抓取间隔、重试次数等
 	private Site site = Site.me().setRetryTimes(3).setSleepTime(1000);
-		
+	
+	// 记录总条数
+	private static String pageNum = null;
 	@Override
 	public Site getSite() {
 		return site;
@@ -34,6 +36,10 @@ public class LianJiaHousePageProcessor implements PageProcessor {
 	@Override
 	// process是定制爬虫逻辑的核心接口，在这里编写抽取逻辑
 	public void process(Page page) {
+		if(page.getUrl().regex("http://"+cityname+"\\.fang\\.lianjia\\.com/loupan/pg1").match() && (pageNum == null)){
+			pageNum = page.getHtml().xpath("//span[@id='findCount']/text()").get();
+			System.out.println("pageNum================"+pageNum);
+		}
 		//房源列表页
 		if(!page.getUrl().regex("http://"+cityname+"\\.fang\\.lianjia\\.com/loupan/p_\\w+").match()){
 			// 添加所有房源页
@@ -41,7 +47,6 @@ public class LianJiaHousePageProcessor implements PageProcessor {
 				.regex("/loupan/p_\\w+")
 				.replace("/loupan/", "http://"+cityname+"\\.fang\\.lianjia\\.com/loupan/")// 巧用替换给把相对url转换成绝对url
 				.all());
-			
 			// 添加其他列表页 //*[@id="matchid"]/div/div/div
 			page.addTargetRequests(page.getHtml().xpath("//div[@id='matchid']/div/div/div").links()
 				.regex("/loupan/pg\\d+")
@@ -55,7 +60,8 @@ public class LianJiaHousePageProcessor implements PageProcessor {
 				all()	返回所有抽取结果	List links= html.links().all()
 				match()	是否有匹配结果	if (html.links().match()){ xxx; }
 			*/
-			size++;// 房源数量加1
+			size++;// 房源数量加1 
+			
 			LianJiaHouseBean ljhb = new LianJiaHouseBean();
 			// 设置房源状态
 			ljhb.setHouseState(page.getHtml().xpath("//div[@class='state-div']/span[@class='state']/text()").get());
@@ -105,8 +111,13 @@ public class LianJiaHousePageProcessor implements PageProcessor {
 		long startTime, endTime;
 		System.out.println("【爬虫开始】请耐心等待一大波数据到你碗里来...");
 		startTime = System.currentTimeMillis();
-		// 从城市房源首页开始抓，开启5个线程，启动爬虫
-		Spider.create(new LianJiaHousePageProcessor()).addUrl("http://" +cityname+ ".fang.lianjia.com/loupan/pg1").thread(5).run();
+		Spider create = Spider.create(new LianJiaHousePageProcessor());
+		//page1必须先执行,不然拿不到pageNum
+		create.addUrl("http://" +cityname+ ".fang.lianjia.com/loupan/pg1").thread(15).run();
+		for (int i = 2; i <= (Integer.parseInt(pageNum)/10); i++) {
+			// 从城市房源page2开始抓，开启15个线程，启动爬虫
+			create.addUrl("http://" +cityname+ ".fang.lianjia.com/loupan/pg"+i).thread(15).run();
+		}
 		endTime = System.currentTimeMillis();
 		System.out.println("【爬虫结束】共抓取" + size + "个房源，耗时约" + ((endTime - startTime) / 1000) + "秒，已保存到数据库，请查收！");
 	}
